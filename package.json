@@ -1,0 +1,10 @@
+{
+  "name": "escrow-admin",
+  "private": true,
+  "type": "module",
+  "description": "Kadena Nexus P2P escrow admin dashboard and email watcher (free.p2p-escrow-v10)",
+  "license": "MIT",
+  "dependencies": {
+    "@netlify/blobs": "11.1.2"
+  }
+}
