@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kadena Nexus – P2P Escrow Dashboard</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c12;--surface:#0e1520;--surface2:#141d2e;--border:#1e2d45;--border2:#243450;--text:#e2eaf5;--muted:#5a7194;--accent:#00d4ff;--accent2:#0098cc;--green:#00e676;--green-bg:rgba(0,230,118,0.08);--yellow:#ffd740;--yellow-bg:rgba(255,215,64,0.08);--orange:#ff9100;--orange-bg:rgba(255,145,0,0.08);--red:#ff5252;--red-bg:rgba(255,82,82,0.08);--blue:#448aff;--blue-bg:rgba(68,138,255,0.08);--lblue:#64b5f6;--lblue-bg:rgba(100,181,246,0.08);--purple:#e040fb;--purple-bg:rgba(224,64,251,0.08);--gray:#78909c;--gray-bg:rgba(120,144,156,0.08);--sell:#ff6b35;--buy:#00d4ff;--row-border:rgba(30,45,69,0.5);--row-hover:rgba(20,29,46,0.8);--header-bg:rgba(8,12,18,0.95);}
+body.light{--bg:#f0f4f8;--surface:#ffffff;--surface2:#e8edf4;--border:#d0dae8;--border2:#b8c8dc;--text:#0f1923;--muted:#6b7fa0;--accent:#0077aa;--accent2:#005f8a;--green:#00875a;--green-bg:rgba(0,135,90,0.08);--yellow:#b87800;--yellow-bg:rgba(184,120,0,0.08);--orange:#c05000;--orange-bg:rgba(192,80,0,0.08);--red:#cc2200;--red-bg:rgba(204,34,0,0.08);--blue:#2255cc;--blue-bg:rgba(34,85,204,0.08);--lblue:#1e6fb0;--lblue-bg:rgba(30,111,176,0.08);--purple:#7700bb;--purple-bg:rgba(119,0,187,0.08);--gray:#4a6070;--gray-bg:rgba(74,96,112,0.08);--sell:#c04000;--buy:#0077aa;--row-border:rgba(208,218,232,0.8);--row-hover:rgba(232,237,244,0.8);--header-bg:rgba(240,244,248,0.95);}
+body.light::before{background-image:linear-gradient(rgba(0,119,170,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,119,170,0.04) 1px,transparent 1px);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.container{position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:0 24px;}
+header{border-bottom:1px solid var(--border);background:var(--header-bg);backdrop-filter:blur(12px);position:sticky;top:0;z-index:200;}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;max-width:1440px;margin:0 auto;gap:12px;flex-wrap:wrap;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:#080c12;}
+.logo-text{font-family:'Space Mono',monospace;font-size:13px;color:var(--muted);line-height:1.3;}
+.logo-text strong{color:var(--text);display:block;font-size:15px;}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.chain-badge{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);padding:4px 10px;border-radius:4px;white-space:nowrap;}
+.node-badge{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);border:1px solid var(--border);padding:4px 10px;border-radius:4px;white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;}
+.btn{background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:8px;transition:all 0.2s;white-space:nowrap;}
+.btn:hover{background:var(--border);border-color:var(--accent);color:var(--accent);}
+.btn.icon{width:36px;height:36px;padding:0;justify-content:center;font-size:16px;}
+.btn.loading{opacity:0.6;pointer-events:none;}
+.btn.loading svg{animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.hero{padding:32px 0 22px;}
+.hero-label{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.hero-label::before{content:'';width:20px;height:1px;background:var(--accent);}
+.hero h1{font-family:'Space Mono',monospace;font-size:clamp(20px,3.5vw,34px);font-weight:700;line-height:1.2;margin-bottom:6px;}
+.hero h1 span{color:var(--accent);}
+.hero-sub{font-size:13px;color:var(--muted);font-family:'Space Mono',monospace;word-break:break-all;}
+.hero-sub a{color:var(--accent);text-decoration:none;}
+.status-bar{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;flex-wrap:wrap;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite;flex-shrink:0;}
+.status-dot.err{background:var(--red);box-shadow:0 0 8px var(--red);}
+.status-dot.busy{background:var(--yellow);box-shadow:0 0 8px var(--yellow);}
+.status-sep{opacity:0.4;}
+.banner{display:none;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.6;}
+.banner.show{display:block;}
+.banner.err{background:var(--red-bg);border:1px solid rgba(255,82,82,0.3);color:var(--red);}
+.banner.warn{background:var(--yellow-bg);border:1px solid rgba(255,215,64,0.3);color:var(--yellow);}
+.banner code{background:rgba(0,0,0,0.2);padding:1px 5px;border-radius:3px;}
+.section-title{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:10px;}
+.stats-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:28px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s;cursor:pointer;}
+.stat-card:hover{transform:translateY(-2px);border-color:var(--border2);}
+.stat-card.active{border-color:var(--accent);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--c,var(--muted));}
+.stat-card .stat-label{color:var(--c,var(--muted));}
+.stat-card.created{--c:var(--green);}
+.stat-card.accepted{--c:var(--blue);}
+.stat-card.funded{--c:var(--lblue);}
+.stat-card.paid{--c:var(--yellow);}
+.stat-card.completed{--c:var(--accent);}
+.stat-card.disputed{--c:var(--red);}
+.stat-card.refunded{--c:var(--orange);}
+.stat-card.closed{--c:var(--gray);}
+.stat-card.total::before{background:linear-gradient(90deg,var(--accent),var(--purple));}
+.stat-card.vol-kda::before{background:linear-gradient(90deg,#00e676,#00d4ff);}
+.stat-card.vol-kda{--c:var(--green);}
+.stat-card.vol-usd::before{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.stat-card.vol-usd{--c:var(--yellow);}
+.stat-card.vol-sell{--c:var(--sell);}
+.stat-card.vol-buy{--c:var(--buy);}
+.stat-card.vol-locked{--c:var(--purple);}
+.stat-card.static{cursor:default;}
+.stat-card.static:hover{transform:none;border-color:var(--border);}
+.stat-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.stat-value{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:var(--text);line-height:1;}
+.stat-value.sm{font-size:18px;}
+.stat-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;}
+.arbiter-panel{background:rgba(255,82,82,0.05);border:1px solid rgba(255,82,82,0.2);border-radius:12px;padding:20px;margin-bottom:28px;}
+.arbiter-panel.clear{background:var(--green-bg);border-color:rgba(0,230,118,0.2);}
+.arbiter-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.arbiter-badge{font-family:'Space Mono',monospace;font-size:10px;color:var(--red);background:var(--red-bg);border:1px solid rgba(255,82,82,0.3);padding:3px 10px;border-radius:4px;letter-spacing:0.08em;}
+.arbiter-title{font-family:'Space Mono',monospace;font-size:13px;color:var(--text);font-weight:700;}
+.arbiter-sub{font-size:12px;color:var(--muted);margin-left:auto;font-family:'Space Mono',monospace;}
+.arbiter-empty{font-family:'Space Mono',monospace;font-size:12px;color:var(--green);padding:4px 0;}
+.arbiter-items{display:flex;flex-direction:column;gap:8px;}
+.arbiter-item{background:var(--surface);border:1px solid rgba(255,82,82,0.15);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color 0.2s;flex-wrap:wrap;}
+.arbiter-item:hover{border-color:rgba(255,82,82,0.4);}
+.arbiter-item.info{border-color:rgba(255,215,64,0.2);}
+.arbiter-item-key{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);}
+.arbiter-item-state{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--red);background:var(--red-bg);border:1px solid rgba(255,82,82,0.2);padding:2px 8px;border-radius:4px;}
+.arbiter-item.info .arbiter-item-state{color:var(--yellow);background:var(--yellow-bg);border-color:rgba(255,215,64,0.2);}
+.arbiter-item-amount{font-family:'Space Mono',monospace;font-size:12px;color:var(--text);margin-left:auto;}
+.arbiter-item-action{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.activity-feed{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:28px;overflow:hidden;}
+.activity-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.activity-title{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;}
+.activity-item{display:flex;align-items:center;gap:14px;padding:11px 18px;border-bottom:1px solid var(--row-border);transition:background 0.12s;cursor:pointer;flex-wrap:wrap;}
+.activity-item:last-child{border-bottom:none;}
+.activity-item:hover{background:var(--row-hover);}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.activity-key{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);}
+.activity-desc{font-size:12px;color:var(--muted);flex:1;}
+.activity-desc strong{color:var(--text);}
+.activity-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;}
+.activity-amount{font-family:'Space Mono',monospace;font-size:11px;color:var(--text);}
+.timeout-warning{display:inline-flex;align-items:center;gap:4px;font-family:'Space Mono',monospace;font-size:9px;color:var(--red);background:var(--red-bg);border:1px solid rgba(255,82,82,0.2);padding:2px 6px;border-radius:3px;margin-left:6px;animation:pulse 1.5s infinite;white-space:nowrap;}
+.timeout-soon{color:var(--yellow);background:var(--yellow-bg);border-color:rgba(255,215,64,0.2);}
+.timeout-ok{color:var(--muted);background:transparent;border-color:var(--border);animation:none;}
+.filters{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-label{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;}
+.filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'Space Mono',monospace;transition:all 0.15s;}
+.filter-btn:hover{border-color:var(--border2);color:var(--text);}
+.filter-btn.active{background:rgba(0,212,255,0.1);border-color:var(--accent);color:var(--accent);}
+.search-input{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:6px;font-size:11px;font-family:'Space Mono',monospace;outline:none;width:220px;margin-left:auto;transition:border-color 0.15s;}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--muted);}
+.table-wrapper{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px;}
+.table-header-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap;}
+.table-title{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;}
+.row-count{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);}
+.table-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--surface2);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;}
+thead th:hover{color:var(--text);}
+thead th.sorted{color:var(--accent);}
+thead th:first-child{padding-left:18px;}
+tbody tr{border-bottom:1px solid var(--row-border);transition:background 0.12s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--row-hover);}
+tbody td{padding:11px 12px;font-size:12px;vertical-align:middle;}
+tbody td:first-child{padding-left:18px;}
+.row-num{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.key-cell{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);}
+.side-badge{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block;}
+.side-badge.SELL{background:rgba(255,107,53,0.15);color:var(--sell);border:1px solid rgba(255,107,53,0.3);}
+.side-badge.BUY{background:rgba(0,212,255,0.1);color:var(--buy);border:1px solid rgba(0,212,255,0.25);}
+.state-badge{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;--c:var(--gray);--cbg:var(--gray-bg);background:var(--cbg);color:var(--c);border:1px solid var(--cbg);}
+.state-badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;background:var(--c);}
+.state-badge.CREATED{--c:var(--green);--cbg:var(--green-bg);}
+.state-badge.ACCEPTED{--c:var(--blue);--cbg:var(--blue-bg);}
+.state-badge.FUNDED{--c:var(--lblue);--cbg:var(--lblue-bg);}
+.state-badge.PAID{--c:var(--yellow);--cbg:var(--yellow-bg);}
+.state-badge.COMPLETED{--c:var(--accent);--cbg:rgba(0,212,255,0.08);}
+.state-badge.DISPUTED{--c:var(--red);--cbg:var(--red-bg);}
+.state-badge.DISPUTED::before{animation:pulse 1.5s infinite;}
+.state-badge.REFUNDED{--c:var(--orange);--cbg:var(--orange-bg);}
+.amount-cell{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;}
+.amount-usd{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);display:block;font-weight:400;}
+.wallet-cell{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;}
+.wallet-cell.me{color:var(--purple);}
+.time-cell{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);white-space:nowrap;}
+.empty-cell{color:var(--border2);font-family:'Space Mono',monospace;}
+.vault-ok{color:var(--green);}
+.vault-bad{color:var(--red);font-weight:700;}
+.rep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:28px;}
+.rep-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:14px;transition:border-color 0.2s,transform 0.2s;}
+.rep-card:hover{border-color:var(--accent2);transform:translateY(-1px);}
+.rep-rank{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--muted);width:32px;flex-shrink:0;text-align:center;}
+.rep-info{flex:1;min-width:0;}
+.rep-wallet{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;}
+.rep-bar-wrap{background:var(--border);border-radius:3px;height:4px;margin-bottom:5px;overflow:hidden;}
+.rep-bar{height:4px;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--accent));transition:width 0.6s ease;}
+.rep-stats{display:flex;gap:10px;flex-wrap:wrap;}
+.rep-stat{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.rep-stat strong{color:var(--text);}
+.rep-score{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green);flex-shrink:0;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform 0.2s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1;gap:10px;}
+.modal-title{font-family:'Space Mono',monospace;font-size:13px;color:var(--text);font-weight:700;word-break:break-all;}
+.modal-close{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-body{padding:18px 22px;}
+.modal-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid var(--row-border);}
+.modal-row:last-child{border-bottom:none;}
+.modal-key{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;flex-shrink:0;width:110px;}
+.modal-val{font-family:'Space Mono',monospace;font-size:11px;color:var(--text);text-align:right;word-break:break-all;}
+.modal-val.accent{color:var(--accent);cursor:pointer;}
+.modal-val a{color:var(--accent);text-decoration:none;margin-left:6px;}
+.modal-section{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.modal-section:first-child{margin-top:0;}
+.timer-row{margin-bottom:12px;}
+.timer-label{display:flex;justify-content:space-between;margin-bottom:4px;}
+.timer-label span{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.timer-label strong{font-family:'Space Mono',monospace;font-size:10px;}
+.timer-bar-wrap{background:var(--border);border-radius:4px;height:5px;overflow:hidden;}
+.timer-bar{height:5px;border-radius:4px;}
+.timer-bar.ok{background:var(--green);}
+.timer-bar.warn{background:var(--yellow);}
+.timer-bar.danger{background:var(--red);}
+.vault-box{font-family:'Space Mono',monospace;font-size:9px;color:var(--purple);background:var(--purple-bg);border:1px solid rgba(224,64,251,0.15);padding:8px 10px;border-radius:6px;margin-top:8px;word-break:break-all;line-height:1.7;}
+.vault-box b{color:var(--text);}
+.cmd-box{font-family:'Space Mono',monospace;font-size:10px;color:var(--text);background:var(--surface2);border:1px solid var(--border);padding:8px 10px;border-radius:6px;margin-top:6px;word-break:break-all;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center;}
+.cmd-box:hover{border-color:var(--accent);}
+.cmd-box span{color:var(--muted);font-size:9px;flex-shrink:0;}
+.loading-state{padding:40px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.spinner{width:30px;height:30px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+.loading-text{font-family:'Space Mono',monospace;color:var(--muted);font-size:11px;}
+.empty-state{padding:40px 20px;text-align:center;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);}
+.error-state{padding:40px 20px;text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--red);word-break:break-word;}
+.error-state strong{display:block;font-size:13px;margin-bottom:8px;}
+footer{border-top:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.footer-text{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.footer-text a{color:var(--accent);text-decoration:none;}
+.tooltip{position:fixed;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text);z-index:1000;pointer-events:none;opacity:0;transition:opacity 0.15s;}
+.tooltip.visible{opacity:1;}
+@media(max-width:700px){header{position:static;}.key-cell{white-space:nowrap;}.activity-item{gap:8px;}.stat-value{font-size:22px;}.search-input{width:100%;margin-left:0;}.hero{padding:22px 0 16px;}.container{padding:0 16px;}.header-inner{padding:12px 16px;}.node-badge{display:none;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">KN</div>
+      <div class="logo-text"><strong>Kadena Nexus</strong>P2P Escrow Monitor</div>
+    </div>
+    <div class="header-right">
+      <span class="node-badge" id="nodeBadge" title="Chainweb node in use">node: –</span>
+      <span class="chain-badge">Chain 1 · Mainnet</span>
+      <button class="btn icon" id="themeBtn" title="Toggle light/dark mode">🌙</button>
+      <button class="btn" id="exportBtn" title="Download all escrows as CSV">⬇ CSV</button>
+      <button class="btn" id="refreshBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-label">Live Dashboard</div>
+    <h1>FREE.P2P-ESCROW-<span>V10</span> – Escrows</h1>
+    <div class="hero-sub">free.p2p-escrow-v10 · Kadena Chain 1 · arbiter <a id="arbiterLink" href="#" target="_blank" rel="noopener">–</a></div>
+    <div class="status-bar">
+      <div class="status-dot busy" id="statusDot"></div>
+      <span id="statusText">Connecting...</span>
+      <span class="status-sep">·</span>
+      <span id="blockInfo">block –</span>
+      <span class="status-sep">·</span>
+      <span id="nextRefresh">next refresh in –</span>
+    </div>
+  </div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="section-title">Escrow States <span style="font-size:9px;letter-spacing:0;text-transform:none;color:var(--muted)">(click a card to filter the table)</span></div>
+  <div class="stats-grid" id="stateCards">
+    <div class="stat-card created" data-state="CREATED"><div class="stat-label">Created</div><div class="stat-value" id="cnt-CREATED">–</div></div>
+    <div class="stat-card accepted" data-state="ACCEPTED"><div class="stat-label">Accepted</div><div class="stat-value" id="cnt-ACCEPTED">–</div></div>
+    <div class="stat-card funded" data-state="FUNDED"><div class="stat-label">Funded</div><div class="stat-value" id="cnt-FUNDED">–</div></div>
+    <div class="stat-card paid" data-state="PAID"><div class="stat-label">Paid</div><div class="stat-value" id="cnt-PAID">–</div></div>
+    <div class="stat-card completed" data-state="COMPLETED"><div class="stat-label">Completed</div><div class="stat-value" id="cnt-COMPLETED">–</div></div>
+    <div class="stat-card disputed" data-state="DISPUTED"><div class="stat-label">Disputed</div><div class="stat-value" id="cnt-DISPUTED">–</div></div>
+    <div class="stat-card refunded" data-state="REFUNDED"><div class="stat-label">Refunded</div><div class="stat-value" id="cnt-REFUNDED">–</div></div>
+    <div class="stat-card closed" data-state="CLOSED"><div class="stat-label">Closed</div><div class="stat-value" id="cnt-CLOSED">–</div></div>
+    <div class="stat-card total" data-state="ALL"><div class="stat-label">Total Escrows</div><div class="stat-value" id="cnt-TOTAL">–</div><div class="stat-sub">Deleted offers are hidden by the contract</div></div>
+  </div>
+  <div class="stats-grid-2">
+    <div class="stat-card vol-kda static"><div class="stat-label">Total KDA Traded</div><div class="stat-value sm" id="vol-KDA">–</div><div class="stat-sub">Completed trades only</div></div>
+    <div class="stat-card vol-usd static"><div class="stat-label">Total USD Traded</div><div class="stat-value sm" id="vol-USD">–</div><div class="stat-sub" id="kda-price-label">Fetching KDA price...</div></div>
+    <div class="stat-card vol-sell static"><div class="stat-label">SELL Side Volume</div><div class="stat-value sm" id="vol-SELL">–</div><div class="stat-sub" id="vol-SELL-usd">–</div></div>
+    <div class="stat-card vol-buy static"><div class="stat-label">BUY Side Volume</div><div class="stat-value sm" id="vol-BUY">–</div><div class="stat-sub" id="vol-BUY-usd">–</div></div>
+    <div class="stat-card vol-locked static"><div class="stat-label">Locked In Vaults</div><div class="stat-value sm" id="vol-LOCKED">–</div><div class="stat-sub" id="vol-LOCKED-sub">Funded + Paid + Disputed</div></div>
+  </div>
+
+  <div class="section-title">Arbiter Panel</div>
+  <div class="arbiter-panel" id="arbiterPanel">
+    <div class="arbiter-header">
+      <span class="arbiter-badge">⚡ ARBITER</span>
+      <span class="arbiter-title">Escrows Requiring Action</span>
+      <span class="arbiter-sub" id="arbiterSub">Loading...</span>
+    </div>
+    <div id="arbiterContent"><div class="loading-text">Loading...</div></div>
+  </div>
+
+  <div class="section-title">Recent Activity</div>
+  <div class="activity-feed">
+    <div class="activity-header">
+      <span class="activity-title">Latest State Changes</span>
+      <span class="row-count" id="activityCount">–</span>
+    </div>
+    <div id="activityList"><div class="loading-state"><div class="spinner"></div></div></div>
+  </div>
+
+  <div class="section-title">All Escrows</div>
+  <div class="filters" id="filters">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" data-filter="ALL">All</button>
+    <button class="filter-btn" data-filter="OPEN">Open</button>
+    <button class="filter-btn" data-filter="CREATED">Created</button>
+    <button class="filter-btn" data-filter="ACCEPTED">Accepted</button>
+    <button class="filter-btn" data-filter="FUNDED">Funded</button>
+    <button class="filter-btn" data-filter="PAID">Paid</button>
+    <button class="filter-btn" data-filter="COMPLETED">Completed</button>
+    <button class="filter-btn" data-filter="DISPUTED">Disputed</button>
+    <button class="filter-btn" data-filter="REFUNDED">Refunded</button>
+    <button class="filter-btn" data-filter="CLOSED">Closed</button>
+    <input class="search-input" id="searchInput" type="text" placeholder="Search id or wallet..."/>
+  </div>
+  <div class="table-wrapper">
+    <div class="table-header-bar">
+      <span class="table-title">Escrow Records</span>
+      <span class="row-count" id="rowCountLabel">–</span>
+    </div>
+    <div class="table-scroll" id="tableContainer"><div class="loading-state"><div class="spinner"></div><span class="loading-text">Fetching from chain...</span></div></div>
+  </div>
+
+  <div class="section-title">Reputation Leaderboard</div>
+  <div id="repGrid" class="rep-grid"><div class="loading-text" style="padding:8px 0;">Loading...</div></div>
+</div>
+
+<footer>
+  <div class="footer-text">Kadena Nexus · <a href="https://kadena.ws" target="_blank" rel="noopener">kadena.ws</a> · <code>free.p2p-escrow-v10</code> · data via <a href="https://explorer.chainweb-community.org" target="_blank" rel="noopener">chainweb-community</a></div>
+  <div class="footer-text" id="lastUpdate">–</div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Escrow Detail</span>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+/* ============================================================
+   Kadena Nexus – P2P Escrow admin dashboard (free.p2p-escrow-v10)
+   ============================================================ */
+const CONTRACT='free.p2p-escrow-v10',CHAIN_ID='1',NETWORK_ID='mainnet01';
+// Ordered list of Chainweb API hosts. The first one that answers is used;
+// the rest are fallbacks so a single dead node does not kill the dashboard.
+const API_HOSTS=[
+  'https://api.chainweb-community.org',
+  'https://chainweb.chaddex.com',
+  'https://api.chainweb.com'
+];
+const EXPLORER='https://explorer.chainweb-community.org';
+const REFRESH_MS=60000;
+const STATES=['CREATED','ACCEPTED','FUNDED','PAID','COMPLETED','DISPUTED','REFUNDED','CLOSED','DELETED'];
+const OPEN_STATES=['CREATED','ACCEPTED','FUNDED','PAID','DISPUTED'];
+
+let allEscrows=[],kdaPrice=null,kdaChange=null,activeFilter='ALL',searchQuery='';
+let sortKey='latest',sortDir=-1;
+let T1=3600,T2=14400,T3=3600,arbiterAddr='';
+let apiBase=null,nodeMeta=null,nextRefreshAt=0,loading=false;
+
+/* ---------- BLAKE2b-256 (Pact command hash) ---------- */
+function blake2b256(bytes){
+  const M64=(1n<<64n)-1n;
+  const IV=[0x6a09e667f3bcc908n,0xbb67ae8584caa73bn,0x3c6ef372fe94f82bn,0xa54ff53a5f1d36f1n,0x510e527fade682d1n,0x9b05688c2b3e6c1fn,0x1f83d9abfb41bd6bn,0x5be0cd19137e2179n];
+  const S=[[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],[14,10,4,8,9,15,13,6,1,12,0,2,11,7,5,3],[11,8,12,0,5,2,15,13,10,14,3,6,7,1,9,4],[7,9,3,1,13,12,11,14,2,6,5,10,4,0,15,8],[9,0,5,7,2,4,10,15,14,1,11,12,6,8,3,13],[2,12,6,10,0,11,8,3,4,13,7,5,15,14,1,9],[12,5,1,15,14,13,4,10,0,7,6,3,9,2,8,11],[13,11,7,14,12,1,3,9,5,0,15,4,8,6,2,10],[6,15,14,9,11,3,0,8,12,2,13,7,1,4,10,5],[10,2,8,4,7,6,1,5,15,11,9,14,3,12,13,0]];
+  const rotr=(x,n)=>((x>>BigInt(n))|(x<<BigInt(64-n)))&M64;
+  const h=IV.slice();h[0]^=0x01010020n;
+  const len=bytes.length;let t=0n;const block=new Uint8Array(128);
+  const compress=(last)=>{
+    const m=new Array(16);
+    for(let i=0;i<16;i++){let w=0n;for(let j=7;j>=0;j--)w=(w<<8n)|BigInt(block[i*8+j]);m[i]=w;}
+    const v=h.concat(IV);v[12]^=t&M64;v[13]^=(t>>64n)&M64;if(last)v[14]^=M64;
+    const G=(a,b,c,d,x,y)=>{v[a]=(v[a]+v[b]+x)&M64;v[d]=rotr(v[d]^v[a],32);v[c]=(v[c]+v[d])&M64;v[b]=rotr(v[b]^v[c],24);v[a]=(v[a]+v[b]+y)&M64;v[d]=rotr(v[d]^v[a],16);v[c]=(v[c]+v[d])&M64;v[b]=rotr(v[b]^v[c],63);};
+    for(let r=0;r<12;r++){const s=S[r%10];
+      G(0,4,8,12,m[s[0]],m[s[1]]);G(1,5,9,13,m[s[2]],m[s[3]]);G(2,6,10,14,m[s[4]],m[s[5]]);G(3,7,11,15,m[s[6]],m[s[7]]);
+      G(0,5,10,15,m[s[8]],m[s[9]]);G(1,6,11,12,m[s[10]],m[s[11]]);G(2,7,8,13,m[s[12]],m[s[13]]);G(3,4,9,14,m[s[14]],m[s[15]]);}
+    for(let i=0;i<8;i++)h[i]^=v[i]^v[i+8];
+  };
+  let off=0;
+  while(len-off>128){block.set(bytes.subarray(off,off+128));t+=128n;compress(false);off+=128;}
+  block.fill(0);block.set(bytes.subarray(off));t+=BigInt(len-off);compress(true);
+  const out=new Uint8Array(32);
+  for(let i=0;i<4;i++)for(let j=0;j<8;j++)out[i*8+j]=Number((h[i]>>BigInt(8*j))&0xffn);
+  let bin='';out.forEach(b=>bin+=String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+/* ---------- Pact /local with node fallback ---------- */
+function localUrl(base){return `${base}/chainweb/0.0/${NETWORK_ID}/chain/${CHAIN_ID}/pact/api/v1/local?preflight=false&signatureVerification=false`;}
+function buildCmd(code,data){
+  const ct=Math.floor(Date.now()/1000);
+  const cmd=JSON.stringify({networkId:NETWORK_ID,payload:{exec:{code,data:data||{}}},signers:[],meta:{chainId:CHAIN_ID,sender:'',gasLimit:1000000,gasPrice:1e-8,ttl:600,creationTime:ct},nonce:`kn-${ct}-${Math.random().toString(36).slice(2,8)}`});
+  return {cmd,hash:blake2b256(new TextEncoder().encode(cmd)),sigs:[]};
+}
+async function pactLocalOn(base,code,data){
+  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),20000);
+  try{
+    const r=await fetch(localUrl(base),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildCmd(code,data)),signal:ctrl.signal});
+    if(!r.ok)throw new Error(`HTTP ${r.status} from ${base}`);
+    const d=await r.json();
+    if(d.result?.status!=='success')throw new Error(d.result?.error?.message||'Pact error');
+    nodeMeta=d.metaData||null;
+    return d.result.data;
+  }finally{clearTimeout(to);}
+}
+async function pactLocal(code,data){
+  const order=apiBase?[apiBase,...API_HOSTS.filter(h=>h!==apiBase)]:API_HOSTS;
+  let lastErr=null;
+  for(const base of order){
+    try{const out=await pactLocalOn(base,code,data);apiBase=base;return out;}
+    catch(e){
+      lastErr=e;
+      // A Pact-level failure (contract error) is the same on every node; do not retry it.
+      if(!/HTTP \d+|abort|Failed to fetch|NetworkError|timeout/i.test(String(e.message)+e.name))throw e;
+      console.warn(`[node] ${base} failed: ${e.message}`);
+    }
+  }
+  throw new Error(`All Chainweb nodes unreachable – last error: ${lastErr?.message||lastErr}`);
+}
+
+/* ---------- Pact value decoding ---------- */
+function num(x){if(x==null)return 0;if(typeof x==='number')return x;if(typeof x==='object'){if('int' in x)return Number(x.int);if('decimal' in x)return Number(x.decimal);}const n=Number(x);return isNaN(n)?0:n;}
+function parseTime(t){
+  if(!t)return null;
+  try{const iso=typeof t==='string'?t:(t.time||t.timep||t.utcTime||'');if(!iso||iso.startsWith('1970-01-01'))return null;const d=new Date(iso);return isNaN(d)?null:d.getTime()/1000;}
+  catch{return null;}
+}
+function idTs(id){const m=/^offer-(\d{13})-/.exec(id||'');return m?Number(m[1])/1000:null;}
+function normalize(id,e){
+  return {id,creator:e.creator||'',buyer:e.buyer||'',arbiter:e.arbiter||'',amount:num(e.amount),state:String(e.state||'').toUpperCase(),side:String(e.side||'').toUpperCase(),
+    acceptedAt:parseTime(e.acceptedAt),fundedAt:parseTime(e.fundedAt),paidAt:parseTime(e.paidAt),createdAt:idTs(id),
+    vault:e.vault||'',vaultBal:e.vaultBal==null?null:num(e.vaultBal)};
+}
+
+/* ---------- Data loading ---------- */
+async function fetchKdaPrice(){
+  try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=kadena&vs_currencies=usd&include_24hr_change=true');const d=await r.json();kdaPrice=d?.kadena?.usd||null;kdaChange=d?.kadena?.usd_24h_change??null;}
+  catch{ /* keep the last known price */ }
+}
+async function loadData(){
+  if(loading)return;loading=true;
+  const btn=document.getElementById('refreshBtn');btn.classList.add('loading');
+  setStatus('Fetching...','busy');hideBanner();
+  try{
+    const [,cfg]=await Promise.all([
+      fetchKdaPrice(),
+      pactLocal(`{"t1":(${CONTRACT}.get-t1),"t2":(${CONTRACT}.get-t2),"t3":(${CONTRACT}.get-t3),"arbiter":(${CONTRACT}.get-arbiter),"ids":(${CONTRACT}.list-escrow-ids)}`)
+    ]);
+    T1=num(cfg.t1)||3600;T2=num(cfg.t2)||14400;T3=num(cfg.t3)||3600;arbiterAddr=cfg.arbiter||'';
+    const ids=Array.isArray(cfg.ids)?cfg.ids:[];
+    const rows=[];
+    // One Pact call per 40 escrows: record + vault principal + live vault balance.
+    for(let i=0;i<ids.length;i+=40){
+      const chunk=ids.slice(i,i+40);
+      const code=`(map (lambda (id) (let* ((e (${CONTRACT}.get-escrow id)) (v (create-principal (${CONTRACT}.create-ESCROW_VAULT_DEBIT-guard id (at "amount" e))))) (+ {"id":id,"vault":v,"vaultBal":(try -1.0 (coin.get-balance v))} e))) (read-msg "ids"))`;
+      const res=await pactLocal(code,{ids:chunk});
+      res.forEach(e=>rows.push(normalize(e.id,e)));
+    }
+    allEscrows=rows;
+    const a=document.getElementById('arbiterLink');a.textContent=shortAddr(arbiterAddr);a.href=`${EXPLORER}/account/${encodeURIComponent(arbiterAddr)}`;
+    updateStats();renderArbiterPanel();renderActivity();renderTable();
+    setStatus(`Live · ${allEscrows.length} escrows`,'ok');
+    document.getElementById('lastUpdate').textContent='Updated: '+new Date().toLocaleString();
+    document.getElementById('nodeBadge').textContent='node: '+apiBase.replace(/^https?:\/\//,'');
+    if(nodeMeta){
+      const bt=nodeMeta.blockTime?nodeMeta.blockTime/1e6:null;
+      const lag=bt?Math.round(Date.now()/1000-bt):null;
+      document.getElementById('blockInfo').textContent=`block ${nodeMeta.blockHeight||'–'}${lag!=null?` (${fmtDur(lag)} old)`:''}`;
+      if(lag!=null&&lag>600)showBanner('warn',`The node <code>${esc(apiBase)}</code> is ${fmtDur(lag)} behind real time. Data may be stale – try Refresh, or check the node.`);
+    }
+    await renderReputation();
+  }catch(err){
+    console.error(err);
+    setStatus('Error – see details','err');
+    showBanner('err',`<strong>Could not load escrows.</strong> ${esc(err.message)}<br>Nodes tried: ${API_HOSTS.map(h=>`<code>${esc(h.replace(/^https?:\/\//,''))}</code>`).join(' ')}. Will retry automatically.`);
+    if(allEscrows.length===0)document.getElementById('tableContainer').innerHTML=`<div class="error-state"><strong>Failed to load</strong>${esc(err.message)}</div>`;
+  }finally{
+    btn.classList.remove('loading');loading=false;nextRefreshAt=Date.now()+REFRESH_MS;
+  }
+}
+
+/* ---------- Stats ---------- */
+function updateStats(){
+  const c={};STATES.forEach(s=>c[s]=0);
+  let tot=0,sell=0,buy=0,locked=0,lockedN=0,mismatch=0;
+  allEscrows.forEach(e=>{
+    if(c[e.state]!==undefined)c[e.state]++;
+    if(e.state==='COMPLETED'){tot+=e.amount;e.side==='SELL'?sell+=e.amount:buy+=e.amount;}
+    if(['FUNDED','PAID','DISPUTED'].includes(e.state)){locked+=e.amount;lockedN++;if(e.vaultBal!=null&&Math.abs(e.vaultBal-e.amount)>1e-9)mismatch++;}
+  });
+  STATES.forEach(k=>{const el=document.getElementById('cnt-'+k);if(el)el.textContent=c[k];});
+  document.getElementById('cnt-TOTAL').textContent=allEscrows.length;
+  document.getElementById('vol-KDA').textContent=fmt(tot)+' KDA';
+  document.getElementById('vol-SELL').textContent=fmt(sell)+' KDA';
+  document.getElementById('vol-BUY').textContent=fmt(buy)+' KDA';
+  document.getElementById('vol-LOCKED').textContent=fmt(locked)+' KDA';
+  document.getElementById('vol-LOCKED-sub').textContent=lockedN===0?'No funds currently in escrow':`${lockedN} active vault${lockedN!==1?'s':''}${mismatch?` · ⚠ ${mismatch} balance mismatch`:' · balances verified'}`;
+  document.getElementById('vol-LOCKED-sub').style.color=mismatch?'var(--red)':'';
+  if(kdaPrice){
+    document.getElementById('vol-USD').textContent='$'+fmt(tot*kdaPrice);
+    const chg=kdaChange!=null?` (${kdaChange>=0?'+':''}${kdaChange.toFixed(1)}% 24h)`:'';
+    document.getElementById('kda-price-label').textContent=`1 KDA = $${kdaPrice.toFixed(5)}${chg} · CoinGecko`;
+    document.getElementById('vol-SELL-usd').textContent='≈ $'+fmt(sell*kdaPrice);
+    document.getElementById('vol-BUY-usd').textContent='≈ $'+fmt(buy*kdaPrice);
+  }else{document.getElementById('vol-USD').textContent='N/A';document.getElementById('kda-price-label').textContent='Price unavailable';}
+}
+
+/* ---------- Arbiter panel ---------- */
+function arbiterItems(){
+  const items=[];
+  allEscrows.forEach(e=>{
+    if(e.state==='DISPUTED')items.push({e,level:'urgent',label:'DISPUTED – release or refund required',cmd:`(${CONTRACT}.release "${e.id}")  or  (${CONTRACT}.refund "${e.id}")`});
+    else if(e.state==='PAID'&&isExp(e.paidAt,T3))items.push({e,level:'urgent',label:'T3 EXPIRED – buyer/seller may dispute; arbiter may release or refund',cmd:`(${CONTRACT}.release "${e.id}")`});
+    else if(e.state==='FUNDED'&&isExp(e.fundedAt,T2))items.push({e,level:'warn',label:'T2 EXPIRED – seller may timeout-refund; arbiter may refund',cmd:`(${CONTRACT}.refund "${e.id}")`});
+    else if(e.state==='ACCEPTED'&&isExp(e.acceptedAt,T1))items.push({e,level:'info',label:'T1 EXPIRED – never funded; anyone can timeout-close',cmd:`(${CONTRACT}.timeout-accepted-close "${e.id}")`});
+    else if(['FUNDED','PAID','DISPUTED'].includes(e.state)&&e.vaultBal!=null&&Math.abs(e.vaultBal-e.amount)>1e-9)items.push({e,level:'urgent',label:`VAULT MISMATCH – holds ${fmtAmt(e.vaultBal)} KDA, expected ${fmtAmt(e.amount)}`,cmd:''});
+  });
+  const rank={urgent:0,warn:1,info:2};
+  return items.sort((a,b)=>rank[a.level]-rank[b.level]||b.e.amount-a.e.amount);
+}
+function renderArbiterPanel(){
+  const items=arbiterItems();
+  const urgent=items.filter(i=>i.level==='urgent').length;
+  document.getElementById('arbiterSub').textContent=items.length?`${items.length} item${items.length!==1?'s':''} · ${urgent} urgent`:'all clear';
+  document.getElementById('arbiterPanel').classList.toggle('clear',items.length===0);
+  if(items.length===0){document.getElementById('arbiterContent').innerHTML='<div class="arbiter-empty">✓ No escrows require arbiter action right now</div>';return;}
+  document.getElementById('arbiterContent').innerHTML=`<div class="arbiter-items">${items.map(({e,level,label})=>
+    `<div class="arbiter-item ${level==='urgent'?'':'info'}" data-open="${esc(e.id)}"><span class="arbiter-item-key">${esc(shortKey(e.id))}</span><span class="arbiter-item-state">${esc(label)}</span><span class="arbiter-item-amount">${fmtAmt(e.amount)} KDA</span><span class="arbiter-item-action">→ View</span></div>`
+  ).join('')}</div>`;
+}
+
+/* ---------- Activity ---------- */
+function latestTs(e){return Math.max(e.paidAt||0,e.fundedAt||0,e.acceptedAt||0,e.createdAt||0);}
+function renderActivity(){
+  const sorted=[...allEscrows].filter(e=>latestTs(e)>0).sort((a,b)=>latestTs(b)-latestTs(a)).slice(0,8);
+  document.getElementById('activityCount').textContent=`${sorted.length} recent`;
+  const colors={COMPLETED:'var(--accent)',DISPUTED:'var(--red)',PAID:'var(--yellow)',FUNDED:'var(--lblue)',ACCEPTED:'var(--blue)',REFUNDED:'var(--orange)',CREATED:'var(--green)',CLOSED:'var(--gray)',DELETED:'var(--gray)'};
+  const descs={COMPLETED:'Trade <strong>completed</strong>',DISPUTED:'<strong>Dispute raised</strong> – arbiter needed',PAID:'Fiat <strong>marked paid</strong>',FUNDED:'Escrow <strong>funded</strong>',ACCEPTED:'Offer <strong>accepted</strong>',REFUNDED:'Trade <strong>refunded</strong>',CREATED:'New offer <strong>created</strong>',CLOSED:'Offer <strong>closed</strong>',DELETED:'Offer <strong>deleted</strong>'};
+  if(sorted.length===0){document.getElementById('activityList').innerHTML='<div class="empty-state">No activity yet.</div>';return;}
+  document.getElementById('activityList').innerHTML=sorted.map(e=>{
+    const col=colors[e.state]||'var(--muted)';const ts=latestTs(e);
+    return `<div class="activity-item" data-open="${esc(e.id)}"><div class="activity-dot" style="background:${col};box-shadow:0 0 6px ${col}"></div><span class="activity-key">${esc(shortKey(e.id))}</span><span class="activity-desc">${descs[e.state]||esc(e.state)} · <span class="side-badge ${e.side==='BUY'?'BUY':'SELL'}" style="font-size:8px;padding:1px 5px">${esc(e.side)}</span></span><span class="activity-amount">${fmtAmt(e.amount)} KDA</span><span class="activity-time" title="${esc(fmtTimeFull(ts))}">${relTime(ts)}</span></div>`;
+  }).join('');
+}
+
+/* ---------- Table ---------- */
+function setFilter(s){
+  activeFilter=s;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter===s));
+  document.querySelectorAll('#stateCards .stat-card').forEach(c=>c.classList.toggle('active',c.dataset.state===s&&s!=='ALL'));
+  renderTable();
+}
+function filteredEscrows(){
+  const q=searchQuery;
+  return allEscrows.filter(e=>{
+    const sm=activeFilter==='ALL'||(activeFilter==='OPEN'?OPEN_STATES.includes(e.state):e.state===activeFilter);
+    return sm&&(!q||e.id.toLowerCase().includes(q)||e.creator.toLowerCase().includes(q)||e.buyer.toLowerCase().includes(q)||e.vault.toLowerCase().includes(q));
+  });
+}
+const SORTERS={latest:e=>latestTs(e),id:e=>e.id,side:e=>e.side,amount:e=>e.amount,state:e=>STATES.indexOf(e.state),creator:e=>e.creator,buyer:e=>e.buyer,accepted:e=>e.acceptedAt||0,funded:e=>e.fundedAt||0,paid:e=>e.paidAt||0,vault:e=>e.vaultBal??-1};
+function timerBadge(e){
+  let field=null,win=0,lbl='';
+  if(e.state==='ACCEPTED'){field=e.acceptedAt;win=T1;lbl='T1';}
+  else if(e.state==='FUNDED'){field=e.fundedAt;win=T2;lbl='T2';}
+  else if(e.state==='PAID'){field=e.paidAt;win=T3;lbl='T3';}
+  if(!field)return '';
+  const r=timeRem(field,win);
+  if(r<=0)return `<span class="timeout-warning">${lbl} EXPIRED</span>`;
+  if(r<1800)return `<span class="timeout-warning timeout-soon">${lbl} ${fmtDur(r)}</span>`;
+  return `<span class="timeout-warning timeout-ok">${lbl} ${fmtDur(r)}</span>`;
+}
+function vaultCell(e){
+  if(!['FUNDED','PAID','DISPUTED'].includes(e.state))return '<span class="empty-cell">–</span>';
+  if(e.vaultBal==null||e.vaultBal<0)return '<span class="empty-cell">n/a</span>';
+  const ok=Math.abs(e.vaultBal-e.amount)<1e-9;
+  return `<span class="${ok?'vault-ok':'vault-bad'}">${ok?'✓ ':'⚠ '}${fmtAmt(e.vaultBal)}</span>`;
+}
+function renderTable(){
+  const data=filteredEscrows();
+  const f=SORTERS[sortKey]||SORTERS.latest;
+  data.sort((a,b)=>{const x=f(a),y=f(b);return (x<y?-1:x>y?1:0)*sortDir||(latestTs(b)-latestTs(a));});
+  document.getElementById('rowCountLabel').textContent=`${data.length} of ${allEscrows.length} record${allEscrows.length!==1?'s':''}`;
+  if(data.length===0){document.getElementById('tableContainer').innerHTML='<div class="empty-state">No escrows match this filter.</div>';return;}
+  const rows=data.map((e,i)=>{
+    const usd=kdaPrice?`<span class="amount-usd">≈ $${(e.amount*kdaPrice).toFixed(2)}</span>`:'';
+    return `<tr data-open="${esc(e.id)}"><td><span class="row-num">${i+1}</span></td><td><span class="key-cell" title="${esc(e.id)}">${esc(shortKey(e.id))}</span></td><td><span class="side-badge ${e.side==='BUY'?'BUY':'SELL'}">${esc(e.side)||'–'}</span></td><td><span class="amount-cell">${fmtAmt(e.amount)} KDA${usd}</span></td><td><span class="state-badge ${esc(e.state)}">${esc(e.state)}</span>${timerBadge(e)}</td><td>${walletHtml(e.creator)}</td><td>${walletHtml(e.buyer)}</td><td><span class="time-cell">${fmtTime(e.createdAt)}</span></td><td><span class="time-cell">${fmtTime(e.acceptedAt)}</span></td><td><span class="time-cell">${fmtTime(e.fundedAt)}</span></td><td><span class="time-cell">${fmtTime(e.paidAt)}</span></td><td><span class="time-cell">${vaultCell(e)}</span></td></tr>`;
+  }).join('');
+  const th=(k,l)=>`<th data-sort="${k}" class="${sortKey===k?'sorted':''}">${l}${sortKey===k?(sortDir>0?' ▲':' ▼'):''}</th>`;
+  document.getElementById('tableContainer').innerHTML=`<table><thead><tr><th>#</th>${th('id','Key')}${th('side','Side')}${th('amount','Amount')}${th('state','State')}${th('creator','Creator')}${th('buyer','Buyer')}${th('latest','Created')}${th('accepted','Accepted')}${th('funded','Funded')}${th('paid','Paid')}${th('vault','Vault KDA')}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+function walletHtml(a){if(!a)return '<span class="empty-cell">–</span>';const me=a===arbiterAddr;return `<span class="wallet-cell${me?' me':''}" title="${esc(a)}">${me?'★ ':''}${esc(shortAddr(a))}</span>`;}
+
+/* ---------- Reputation ---------- */
+async function renderReputation(){
+  const wallets=[...new Set(allEscrows.flatMap(e=>[e.creator,e.buyer].filter(w=>w&&w.length>2)))];
+  if(wallets.length===0){document.getElementById('repGrid').innerHTML='<div class="empty-state" style="padding:8px 0">No participants yet.</div>';return;}
+  let reps=[];
+  try{
+    for(let i=0;i<wallets.length;i+=50){
+      const res=await pactLocal(`(map (lambda (w) (+ {"wallet":w} (${CONTRACT}.get-reputation w))) (read-msg "w"))`,{w:wallets.slice(i,i+50)});
+      res.forEach(r=>reps.push({wallet:r.wallet,total:num(r.totalTrades),ok:num(r.successfulTrades),disputes:num(r.disputesCount)}));
+    }
+  }catch(e){console.error(e);document.getElementById('repGrid').innerHTML=`<div class="error-state" style="padding:8px 0">Reputation unavailable: ${esc(e.message)}</div>`;return;}
+  const valid=reps.filter(r=>r.total>0).sort((a,b)=>(b.ok/b.total)-(a.ok/a.total)||b.total-a.total);
+  if(valid.length===0){document.getElementById('repGrid').innerHTML='<div class="empty-state" style="padding:8px 0">No reputation data yet – complete some trades!</div>';return;}
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('repGrid').innerHTML=valid.map((r,i)=>{
+    const rate=Math.round((r.ok/r.total)*100);
+    return `<div class="rep-card"><div class="rep-rank">${medals[i]||'#'+(i+1)}</div><div class="rep-info"><div class="rep-wallet" title="${esc(r.wallet)}" data-copy="${esc(r.wallet)}">${r.wallet===arbiterAddr?'★ ':''}${esc(shortAddr(r.wallet))}</div><div class="rep-bar-wrap"><div class="rep-bar" style="width:${rate}%"></div></div><div class="rep-stats"><span class="rep-stat">Trades: <strong>${r.total}</strong></span><span class="rep-stat">Success: <strong>${r.ok}</strong></span><span class="rep-stat">Refunds/disputes: <strong>${r.disputes}</strong></span></div></div><div class="rep-score" style="color:${rate>=80?'var(--green)':rate>=50?'var(--yellow)':'var(--red)'}">${rate}%</div></div>`;
+  }).join('');
+}
+
+/* ---------- Modal ---------- */
+function openModal(id){
+  const e=allEscrows.find(x=>x.id===id);if(!e)return;
+  const usd=kdaPrice?` (≈ $${(e.amount*kdaPrice).toFixed(2)})`:'';
+  let timers='';
+  if(e.state==='ACCEPTED'&&e.acceptedAt)timers+=timerHTML('T1 – Funding window',e.acceptedAt,T1);
+  if(e.state==='FUNDED'&&e.fundedAt)timers+=timerHTML('T2 – Payment window',e.fundedAt,T2);
+  if(e.state==='PAID'&&e.paidAt)timers+=timerHTML('T3 – Release window',e.paidAt,T3);
+  const seller=e.side==='SELL'?e.creator:e.buyer,recipient=e.side==='SELL'?e.buyer:e.creator;
+  const actions=[];
+  if(e.state==='DISPUTED'||e.state==='PAID')actions.push(`(${CONTRACT}.release "${e.id}")`);
+  if(['FUNDED','PAID','DISPUTED'].includes(e.state))actions.push(`(${CONTRACT}.refund "${e.id}")`);
+  if(e.state==='ACCEPTED'&&isExp(e.acceptedAt,T1))actions.push(`(${CONTRACT}.timeout-accepted-close "${e.id}")`);
+  const vaultLine=['FUNDED','PAID','DISPUTED'].includes(e.state)
+    ?(e.vaultBal==null||e.vaultBal<0?'balance unavailable':`live balance <b class="${Math.abs(e.vaultBal-e.amount)<1e-9?'vault-ok':'vault-bad'}">${fmtAmt(e.vaultBal)} KDA</b>`)
+    :'vault not active in this state';
+  const wl=a=>a?`<span class="modal-val accent" data-copy="${esc(a)}">${esc(a)} 📋<a href="${EXPLORER}/account/${encodeURIComponent(a)}" target="_blank" rel="noopener" title="Open in explorer">↗</a></span>`:'<span class="modal-val">–</span>';
+  document.getElementById('modalTitle').textContent=shortKey(id);
+  document.getElementById('modalBody').innerHTML=`
+    <div class="modal-section">Escrow Info</div>
+    <div class="modal-row"><span class="modal-key">Full ID</span><span class="modal-val accent" data-copy="${esc(id)}">${esc(id)} 📋</span></div>
+    <div class="modal-row"><span class="modal-key">Side</span><span class="modal-val">${esc(e.side)||'–'} ${e.side==='SELL'?'(creator sells KDA)':e.side==='BUY'?'(creator buys KDA)':''}</span></div>
+    <div class="modal-row"><span class="modal-key">Amount</span><span class="modal-val">${fmtAmt(e.amount,8)} KDA${usd}</span></div>
+    <div class="modal-row"><span class="modal-key">State</span><span class="modal-val"><span class="state-badge ${esc(e.state)}">${esc(e.state)}</span></span></div>
+    <div class="modal-section">Participants</div>
+    <div class="modal-row"><span class="modal-key">Creator</span>${wl(e.creator)}</div>
+    <div class="modal-row"><span class="modal-key">Buyer</span>${wl(e.buyer)}</div>
+    <div class="modal-row"><span class="modal-key">KDA seller</span><span class="modal-val">${esc(shortAddr(seller))||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">KDA receiver</span><span class="modal-val">${esc(shortAddr(recipient))||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Arbiter</span>${wl(e.arbiter)}</div>
+    <div class="modal-section">Vault</div>
+    <div class="vault-box">principal: <b data-copy="${esc(e.vault)}" style="cursor:pointer">${esc(e.vault)||'–'}</b><br>guard: ESCROW_VAULT_DEBIT id="${esc(id)}" amount=${e.amount}<br>${vaultLine}</div>
+    <div class="modal-section">Timeline</div>
+    <div class="modal-row"><span class="modal-key">Created</span><span class="modal-val">${fmtTimeFull(e.createdAt)}${e.createdAt?' (from id)':''}</span></div>
+    <div class="modal-row"><span class="modal-key">Accepted</span><span class="modal-val">${fmtTimeFull(e.acceptedAt)}</span></div>
+    <div class="modal-row"><span class="modal-key">Funded</span><span class="modal-val">${fmtTimeFull(e.fundedAt)}</span></div>
+    <div class="modal-row"><span class="modal-key">Paid</span><span class="modal-val">${fmtTimeFull(e.paidAt)}</span></div>
+    ${timers?`<div class="modal-section">Active Timers</div>${timers}`:''}
+    ${actions.length?`<div class="modal-section">Arbiter actions (Pact code – sign with the arbiter key)</div>${actions.map(c=>`<div class="cmd-box" data-copy="${esc(c)}">${esc(c)}<span>copy</span></div>`).join('')}`:''}`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function timerHTML(label,ts,seconds){
+  const rem=timeRem(ts,seconds),pct=rem>0?Math.min(100,Math.round((rem/seconds)*100)):0;
+  const cls=pct>50?'ok':pct>20?'warn':'danger';
+  const status=rem>0?fmtDur(rem)+' remaining':'EXPIRED';
+  const color=cls==='ok'?'var(--green)':cls==='warn'?'var(--yellow)':'var(--red)';
+  return `<div class="timer-row"><div class="timer-label"><span>${label} (${fmtDur(seconds)})</span><strong style="color:${color}">${status}</strong></div><div class="timer-bar-wrap"><div class="timer-bar ${cls}" style="width:${pct}%"></div></div></div>`;
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+
+/* ---------- CSV export ---------- */
+function exportCsv(){
+  const cols=['id','state','side','amount','creator','buyer','arbiter','vault','vaultBal','createdAt','acceptedAt','fundedAt','paidAt'];
+  const q=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+  const lines=[cols.join(',')].concat(allEscrows.map(e=>cols.map(c=>q(/At$/.test(c)?(e[c]?new Date(e[c]*1000).toISOString():''):e[c])).join(',')));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`p2p-escrow-v10-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+/* ---------- Helpers ---------- */
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtAmt(n,max=4){return Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:max});}
+function shortKey(id){if(!id)return'–';const p=id.split('-');return p.length>=3&&p[0]==='offer'?p[1]+'…'+p[p.length-1]:id.length>18?id.slice(0,10)+'…'+id.slice(-4):id;}
+function shortAddr(a){if(!a)return'';const s=a.startsWith('k:')?a.slice(2):a;return s.length>12?s.slice(0,6)+'…'+s.slice(-4):s;}
+function fmtTime(ts){if(!ts)return'<span class="empty-cell">–</span>';return new Date(ts*1000).toISOString().slice(0,16).replace('T',' ');}
+function fmtTimeFull(ts){if(!ts)return'–';return new Date(ts*1000).toISOString().slice(0,19).replace('T',' ')+' UTC';}
+function relTime(ts){const d=Math.floor(Date.now()/1000-ts);if(d<60)return d+'s ago';if(d<3600)return Math.floor(d/60)+'m ago';if(d<86400)return Math.floor(d/3600)+'h ago';return Math.floor(d/86400)+'d ago';}
+function isExp(ts,secs){if(!ts)return false;return(Date.now()/1000)>(ts+secs);}
+function timeRem(ts,secs){if(!ts)return-1;return Math.max(0,(ts+secs)-Date.now()/1000);}
+function fmtDur(s){s=Math.max(0,s);if(s<60)return Math.floor(s)+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h '+Math.floor((s%3600)/60)+'m';return Math.floor(s/86400)+'d '+Math.floor((s%86400)/3600)+'h';}
+function copyText(text){if(!text)return;navigator.clipboard?.writeText(text).catch(()=>{});const t=document.getElementById('tooltip');t.textContent='Copied!';t.classList.add('visible');setTimeout(()=>t.classList.remove('visible'),1500);}
+function setStatus(msg,kind){document.getElementById('statusText').textContent=msg;const d=document.getElementById('statusDot');d.className='status-dot'+(kind==='err'?' err':kind==='busy'?' busy':'');}
+function showBanner(kind,html){const b=document.getElementById('banner');b.className=`banner show ${kind}`;b.innerHTML=html;}
+function hideBanner(){document.getElementById('banner').className='banner';}
+
+/* ---------- Events (delegated, no inline handlers) ---------- */
+document.addEventListener('click',e=>{
+  const open=e.target.closest('[data-open]');if(open){openModal(open.dataset.open);return;}
+  const copy=e.target.closest('[data-copy]');if(copy){e.stopPropagation();copyText(copy.dataset.copy);return;}
+  const th=e.target.closest('th[data-sort]');if(th){const k=th.dataset.sort;if(sortKey===k)sortDir=-sortDir;else{sortKey=k;sortDir=k==='latest'||/At$|amount|vault/.test(k)?-1:1;}renderTable();return;}
+  const fb=e.target.closest('.filter-btn');if(fb){setFilter(fb.dataset.filter);return;}
+  const card=e.target.closest('#stateCards .stat-card');if(card){setFilter(card.classList.contains('active')?'ALL':card.dataset.state);document.getElementById('filters').scrollIntoView({behavior:'smooth',block:'start'});return;}
+});
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')closeModal();});
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('refreshBtn').addEventListener('click',loadData);
+document.getElementById('exportBtn').addEventListener('click',exportCsv);
+document.getElementById('searchInput').addEventListener('input',e=>{searchQuery=e.target.value.trim().toLowerCase();renderTable();});
+document.addEventListener('mousemove',e=>{const t=document.getElementById('tooltip');t.style.left=(e.clientX+12)+'px';t.style.top=(e.clientY-28)+'px';});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ---------- Theme ---------- */
+function applyTheme(light){document.body.classList.toggle('light',light);document.getElementById('themeBtn').textContent=light?'🌙':'☀️';}
+document.getElementById('themeBtn').addEventListener('click',()=>{const light=!document.body.classList.contains('light');applyTheme(light);try{localStorage.setItem('kn-theme',light?'light':'dark');}catch{}});
+try{applyTheme(localStorage.getItem('kn-theme')==='light');}catch{applyTheme(false);}
+
+/* ---------- Refresh loop ---------- */
+loadData();
+setInterval(()=>{
+  if(!loading&&Date.now()>=nextRefreshAt&&!document.hidden)loadData();
+  const s=Math.max(0,Math.round((nextRefreshAt-Date.now())/1000));
+  document.getElementById('nextRefresh').textContent=loading?'refreshing…':`next refresh in ${s}s`;
+},1000);
+// Live timers tick every 30 s without a network call.
+setInterval(()=>{if(allEscrows.length&&!loading){renderArbiterPanel();renderTable();}},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()>=nextRefreshAt)loadData();});
+</script>
+</body>
+</html>
