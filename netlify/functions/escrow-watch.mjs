@@ -1,5 +1,6 @@
 // Netlify scheduled function: checks the escrow contract every 5 minutes
-// and emails when an escrow becomes FUNDED, COMPLETED or DISPUTED.
+// and emails when an escrow changes state (see WATCH in lib/watch.mjs), plus once when a
+// trade gets stuck: FUNDED past the 4 h payment window or PAID past the 1 h release window.
 import { getStore } from '@netlify/blobs';
 import { run, sendResend } from '../../lib/watch.mjs';
 
