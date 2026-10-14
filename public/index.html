@@ -577,7 +577,7 @@ function renderTable(){
   document.getElementById('rowCountLabel').textContent=`${data.length} of ${allEscrows.length} record${allEscrows.length!==1?'s':''}`;
   if(data.length===0){document.getElementById('tableContainer').innerHTML='<div class="empty-state">No escrows match this filter.</div>';return;}
   const rows=data.map((e,i)=>{
-    const usd=kdaPrice?`<span class="amount-usd">≈ $${(e.amount*kdaPrice).toFixed(2)}</span>`:'';
+    const usd=kdaPrice?`<span class="amount-usd">≈ $${fmt(e.amount*kdaPrice)}</span>`:'';
     return `<tr data-open="${esc(e.id)}"><td><span class="row-num">${i+1}</span></td><td><span class="key-cell" title="${esc(e.id)}">${esc(shortKey(e.id))}</span></td><td><span class="side-badge ${e.side==='BUY'?'BUY':'SELL'}">${esc(e.side)||'–'}</span></td><td><span class="amount-cell">${fmtAmt(e.amount)} KDA${usd}</span></td><td><span class="state-badge ${esc(e.state)}">${esc(e.state)}</span>${timerBadge(e)}</td><td>${walletHtml(e.creator)}</td><td>${walletHtml(e.buyer)}</td><td><span class="time-cell">${fmtTime(e.createdAt)}</span></td><td><span class="time-cell">${fmtTime(e.acceptedAt)}</span></td><td><span class="time-cell">${fmtTime(e.fundedAt)}</span></td><td><span class="time-cell">${fmtTime(e.paidAt)}</span></td><td><span class="time-cell">${vaultCell(e)}</span></td></tr>`;
   }).join('');
   const th=(k,l)=>`<th data-sort="${k}" class="${sortKey===k?'sorted':''}">${l}${sortKey===k?(sortDir>0?' ▲':' ▼'):''}</th>`;
@@ -608,7 +608,7 @@ async function renderReputation(){
 /* ---------- Modal ---------- */
 function openModal(id){
   const e=allEscrows.find(x=>x.id===id);if(!e)return;
-  const usd=kdaPrice?` (≈ $${(e.amount*kdaPrice).toFixed(2)})`:'';
+  const usd=kdaPrice?` (≈ $${fmt(e.amount*kdaPrice)})`:'';
   let timers='';
   if(e.state==='ACCEPTED'&&e.acceptedAt)timers+=timerHTML('T1 – Funding window',e.acceptedAt,T1);
   if(e.state==='FUNDED'&&e.fundedAt)timers+=timerHTML('T2 – Payment window',e.fundedAt,T2);
@@ -666,7 +666,7 @@ function exportCsv(){
 
 /* ---------- Helpers ---------- */
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function fmt(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmt(n){if(!Number.isFinite(n))return'?';if(Math.abs(n)>=1||n===0)return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});return n.toLocaleString('en-US',{maximumSignificantDigits:3});}
 function fmtAmt(n,max=4){return Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:max});}
 function shortKey(id){if(!id)return'–';const p=id.split('-');return p.length>=3&&p[0]==='offer'?p[1]+'…'+p[p.length-1]:id.length>18?id.slice(0,10)+'…'+id.slice(-4):id;}
 function shortAddr(a){if(!a)return'';const s=a.startsWith('k:')?a.slice(2):a;return s.length>12?s.slice(0,6)+'…'+s.slice(-4):s;}
