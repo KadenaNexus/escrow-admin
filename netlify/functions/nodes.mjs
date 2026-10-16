@@ -3,7 +3,7 @@ import { getStore } from '@netlify/blobs';
 import { publicView } from '../../lib/nodes.mjs';
 
 const headers = {
-  'content-type': 'application/json',
+  'content-type': 'application/json; charset=utf-8',
   'access-control-allow-origin': '*',
   'cache-control': 'public, max-age=60',
 };
