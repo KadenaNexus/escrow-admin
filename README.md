@@ -6,7 +6,7 @@ Admin dashboard and email alerts for the `free.p2p-escrow-v10` contract on Kaden
 - `netlify/functions/escrow-watch.mjs` – runs every 5 minutes on Netlify and emails when an escrow becomes **FUNDED**, **COMPLETED** or **DISPUTED**.
 - `lib/watch.mjs` – the watcher logic (chain query, change detection, email content).
 - `netlify/functions/site-watch.mjs` + `lib/sites.mjs` – every 5 minutes checks that each Kadena Nexus site answers (Marketplace page and server, kadena.ws, Kadena Devs, Network Monitor, Adoption Index, Kadena Earn, Quantum-Safe Kadena). Emails **[Down]** after 2 failed checks in a row (about 10 minutes), **[Still down]** every 6 hours, and **[Back up]** when it answers again. Tests: `node --test lib/sites.test.mjs`.
-- `netlify/functions/node-crawl.mjs` + `lib/nodes.mjs` – every 10 minutes checks the public Kadena nodes, starting from our Jeddah node (`193.122.85.1:1789`) and the peers each node reports, and places them on the map. `netlify/functions/nodes.mjs` serves the result at **`/api/nodes`** (public, read-only) for the Network Monitor at nodes.kadena.ws. Replaces the denascan.com crawler. Tests: `node --test lib/nodes.test.mjs`.
+- `netlify/functions/node-crawl.mjs` + `lib/nodes.mjs` – every 10 minutes checks the public Kadena nodes, starting from our Jeddah node (`193.122.85.1:1789`) and the peers each node reports, and places them on the map. For each node it records software version, peer count, average response time and uptime. `netlify/functions/nodes.mjs` serves the result at **`/api/nodes`** (public, read-only) for the Network Monitor at nodes.kadena.ws. Replaces the denascan.com crawler. Tests: `node --test lib/nodes.test.mjs`.
 
 Nothing secret is stored in this repository. Keys live in Netlify environment variables.
 
